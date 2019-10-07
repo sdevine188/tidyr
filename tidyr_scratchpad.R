@@ -5,6 +5,69 @@ library(tidyr)
 # https://rpubs.com/bradleyboehmke/data_wrangling
 # https://github.com/tclavelle/dplyr-tidyr-tutorial
 
+
+
+# pivot_wider
+fish_encounters
+fish_encounters %>%
+        pivot_wider(names_from = station, values_from = seen)
+
+# fill in missing values
+fish_encounters %>%
+        pivot_wider(
+                names_from = station,
+                values_from = seen,
+                values_fill = list(seen = 0)
+        )
+
+# Generate column names from multiple variables
+us_rent_income
+us_rent_income %>%
+        pivot_wider(names_from = variable, values_from = c(estimate, moe))
+
+
+##################
+
+
+# pivot_longer
+
+# Simplest case where column names are character data
+relig_income
+relig_income %>%
+        pivot_longer(-religion, names_to = "income", values_to = "count")
+
+# Slightly more complex case where columns have common prefix,
+# and missing missings are structural so should be dropped.
+billboard
+billboard %>%
+        pivot_longer(
+                cols = starts_with("wk"),
+                names_to = "week",
+                names_prefix = "wk",
+                values_to = "rank",
+                values_drop_na = TRUE
+        )
+
+# Multiple variables stored in colum names
+who %>% pivot_longer(
+        cols = new_sp_m014:newrel_f65,
+        names_to = c("diagnosis", "gender", "age"),
+        names_pattern = "new_?(.*)_(.)(.*)",
+        values_to = "count"
+)
+
+# Multiple observations per row
+anscombe
+anscombe %>%
+        pivot_longer(everything(),
+                     names_to = c(".value", "set"),
+                     names_pattern = "(.)(.)"
+        )
+
+
+###################################################################################3
+
+
 # create dummy data
 df <- data.frame(month = rep(1:3,2),
                  student = rep(c("Amy", "Bob"), each = 3),
@@ -12,7 +75,7 @@ df <- data.frame(month = rep(1:3,2),
                  B = c(6, 7, 8, 5, 6, 7))
 df
 
-# convert to long data, then convert to wide
+# using old tidyr gather/spread, convert to long data, then convert to wide
 df %>% gather(key = variable, value = value, -c(month, student)) %>%
         unite(col = placeholder, student, variable) %>% spread(key = placeholder, value = value)
 
